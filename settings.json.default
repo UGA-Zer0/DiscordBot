@@ -1,0 +1,5 @@
+{
+  "token": "BOT OAUTH TOKEN",
+  "voiceChannel": "VOICE CHANNEL ID",
+  "textChannel": "TEXT CHANNEL ID"
+}
