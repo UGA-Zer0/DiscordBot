@@ -153,9 +153,8 @@ let commands = [ // command list. Stores each command as an object with the comm
   },
 
   //Play command. Adds a song to the queue.
-  //TODO: change the name of this command - play suggests that it will start playing instantly. Maybe 'add' or 'request'.
   {
-    command: 'play',
+    command: 'queue',
     description: 'Plays the requested video, or adds it to the queue.',
     params: ["Youtube URL"],
     execute: (m, p) => {
