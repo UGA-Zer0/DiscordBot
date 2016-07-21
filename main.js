@@ -137,7 +137,6 @@ let commands = [ // command list. Stores each command as an object with the comm
   },
 
   //Avatar command. Displays the user's avatar URL (if they have one)
-  //TODO: add handling for when the user has no avatar. Right now it just prints 'null'.
   {
     command: 'avatar',
     description: 'Displays your avatar URL',
