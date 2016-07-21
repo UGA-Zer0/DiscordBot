@@ -1,5 +1,5 @@
 
-Copyright (c) 2016, Zer0 <>
+Copyright (c) 2016, Zer0 <zer0hd18@gmail.com>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
