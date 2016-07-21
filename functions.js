@@ -6,14 +6,6 @@
 'use strict';
 
 module.exports = {
-  //isUrl
-  //=====
-  //
-  //Checks whether a string is in URL format or not.
-  isUrl: (s) => {
-    var regexp = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
-    return regexp.test(s);
-  },
 
   getVideoId: (v) => {
     let searchToken = "?v=";
