@@ -8,7 +8,7 @@
 const Discord = require("discord.js"); // the main package. Makes the bot work in the first place.
 const settings = require("./settings.json"); // authentication stuff (oauth token) and default settings stored in here.
 const func = require("./functions.js"); // a couple of functions are stored here. I might just move them into this file for the sake of simplicity.
-const request = require('request'); // require the request pachage - just so I don't have to use cURL.
+const request = require('request'); // require the request package - just so I don't have to use cURL.
 
 const bot = new Discord.Client({ // set up bot object
   autoReconnect: true // automatically attempt to reconnect if the server dies, etc.
