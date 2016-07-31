@@ -9,10 +9,9 @@ const Discord = require("discord.js"); // the main package. Makes the bot work i
 const settings = require("./settings.json"); // authentication stuff (oauth token) and default settings stored in here.
 const func = require("./functions.js"); // a couple of functions are stored here. I might just move them into this file for the sake of simplicity.
 const request = require('request'); // require the request package - just so I don't have to use cURL.
+const ytdl = require('ytdl-core'); // ytdl - used for streaming audio from youtube videos
 
-const bot = new Discord.Client({ // set up bot object
-  autoReconnect: true // automatically attempt to reconnect if the server dies, etc.
-});
+const bot = new Discord.Client({ autoReconnect: true });
 
 let queue = [], // create queue as an empty array. URLs will be pushed here as users add them.
     paused = false; // defines whether the playlist is paused. Without this, whenever the playlist is paused the bot thinks the song is finished and skips is. Not ideal.
@@ -158,8 +157,17 @@ let commands = [ // command list. Stores each command as an object with the comm
     description: 'Plays the requested video, or adds it to the queue.',
     params: ["Youtube URL"],
     execute: (m, p) => {
-      let videoId = func.getVideoId(p[1]);
-      play(videoId, m);
+      if (inChannel()) {
+        if (p[1].startsWith("http") && (p[1].indexOf("youtube") !== -1 || p[1].indexOf("youtu.be") !== -1)) {
+          play(m, p[1]);
+        }
+        else {
+          bot.reply(m, "Please enter a valid Youtube URL");
+        }
+      }
+      else {
+        bot.reply(m, "You must be in the same voice channel as the bot to queue songs.");
+      }
     }
   },
 
@@ -303,28 +311,17 @@ function executeCommand(m, c) { // Called when the user types a command in chat
   }
 }
 
-function play(id, m) { // called when a user requests a song to add to the queue
-  let baseURL = "https://savedeo.com/download?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D"; // using savedeo to download and play audio files.
+function play(m, url) {
+  ytdl.getInfo(url, (err, info) => {
+    let stream = ytdl.downloadFromInfo(info);
+    queue.push({
+      title: info.title,
+      user: m.author.username,
+      stream: stream
+    });
 
-  request (baseURL + id, (err, res, body) => { // Append the youtube video ID to the base URL and request the page contents
-    if (!err && res.statusCode == 200) { // check that no errors are thrown and the HTTP response is 200 (success)
-      let cheerio = require('cheerio'), $ = cheerio.load(body); // load the response body with cheerio
-      let videoTitle = $('title').text(); // set the video title to the title of the page.
-      let audioUrl = $('#main div.clip table tbody tr th span.fa-music').first().parent().parent().find('td a').attr('href'); // horrible selector query to get the first URL to an audio file
-
-      queue.push({ // push this file to the queue
-        title: videoTitle, // this is all self-explanatory. Just storing data about the song.
-        user: m.author.username,
-        url: audioUrl
-      });
-
-      bot.sendMessage(m.channel, `"${videoTitle}" has been added to the queue by ${m.author.username}`); // Tell everyone what song was added and by who.
-    }
-    else { // If 'err' exists, or response code is not 200.
-      bot.sendMessage(m.channel, "There was an issue handling your request."); // generic error message
-      console.log("Error requesting video: " + err); // log stuff
-    }
-  })
+    bot.sendMessage(m.channel, info.title+" has been added to the queue by "+m.author.username);
+  });
 }
 
 function checkQueue() { // called every 5 seconds.
@@ -335,7 +332,7 @@ function checkQueue() { // called every 5 seconds.
 }
 
 function playNext() { // called when a user runs the !stop command, or when a song ends
-  bot.voiceConnection.playFile(queue[0]['url']); // play the first song in the queue. This song is then removed, so the first song is the next song. Makes sense?
-  bot.sendMessage(settings.textChannel, 'Now playing "'+queue[0]['title']+'", requested by '+queue[0]['user']); // more messaging
+  bot.voiceConnection.playFile(queue[0].stream); // play the first song in the queue. This song is then removed, so the first song is the next song. Makes sense?
+  bot.sendMessage(settings.textChannel, 'Now playing "'+queue[0].title+'", requested by '+queue[0].user); // more messaging
   queue.splice(0,1); // Remove the song we just played from the queue, so queue[0] is always the next song.
 }
